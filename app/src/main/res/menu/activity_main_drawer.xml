@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:showIn="navigation_view">
+
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/nav_dich"
+            android:icon="@drawable/ic_translate_black_24dp"
+            android:title="Dịch" />
+        <item
+            android:id="@+id/nav_themtu"
+            android:icon="@drawable/ic_control_point_black_24dp"
+            android:title="Thêm từ mới" />
+        <item
+            android:id="@+id/nav_lichsu"
+            android:icon="@drawable/ic_history_black_24dp"
+            android:title="Lịch sử" />
+        <item
+            android:id="@+id/nav_youtube"
+            android:icon="@drawable/ic_youtube_logo"
+            android:title="Kênh youtube học tiếng anh"/>
+    </group>
+</menu>
