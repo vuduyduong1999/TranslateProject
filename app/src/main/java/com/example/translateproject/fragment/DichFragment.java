@@ -37,7 +37,7 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 //import com.google.auth.oauth2.GoogleCredentials;
-//import com.google.cloud.translate.Translate;
+import com.google.cloud.translate.Translate;
 //import com.google.cloud.translate.v3.Translation;
 //import com.google.cloud.translate.TranslateOptions;
 //import com.google.cloud.translate.Translation;
@@ -47,13 +47,15 @@ import com.google.firebase.ml.vision.text.FirebaseVisionCloudTextRecognizerOptio
 import com.google.firebase.ml.vision.text.FirebaseVisionText;
 import com.google.firebase.ml.vision.text.FirebaseVisionTextRecognizer;
 //import com.google.api.services.translate.Translate;
-//import com.google.auth.oauth2.GoogleCredentials;
-//import com.google.cloud.translate.Translate;
-//import com.google.cloud.translate.TranslateOptions;
-//import com.google.cloud.translate.Translation;
+import com.google.auth.oauth2.GoogleCredentials;
+import com.google.cloud.translate.Translate;
+import com.google.cloud.translate.TranslateOptions;
+import com.google.cloud.translate.Translation;
 
 //import java.io.IOException;
 //import java.io.InputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 //import java.util.Arrays;
 import java.util.List;
@@ -78,7 +80,7 @@ public class DichFragment extends Fragment {
     static final int REQUEST_IMAGE_CAPTURE = 1;
     Bitmap imageBitmap;
     int f = 0;
-//    Translate translate;
+    Translate translate;
     public DichFragment() {
         // Required empty public constructor
     }
@@ -166,14 +168,14 @@ public class DichFragment extends Fragment {
         btnDich.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-//                if (checkInternetConnection()) {
-////                    getTranslateService();
-////                    translate();
-//                } else {
-//
-//                    //If not, display "no connection" warning:
-//                    tvN.setText(getResources().getString(R.string.no_connection));
-//                }
+                if (checkInternetConnection()) {
+                    getTranslateService();
+                    translate();
+                } else {
+
+                    //If not, display "no connection" warning:
+                    tvN.setText(getResources().getString(R.string.no_connection));
+                }
             }
         });
 
@@ -265,27 +267,27 @@ public class DichFragment extends Fragment {
     }
 
     private void getTranslateService() {
-//        StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
-//        StrictMode.setThreadPolicy(policy);
-//        try (InputStream is = getResources().openRawResource(R.raw.hihidichduocroine_211199)){
-//            final GoogleCredentials mycredentials = GoogleCredentials.fromStream(is);
-//
-//            TranslateOptions translateOptions = TranslateOptions.newBuilder().setCredentials(mycredentials).build();
-//            translate = translateOptions.getService();
-//
-//        }
-//        catch (IOException ioe)
-//        {
-//            ioe.printStackTrace();
-//        }
+        StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+        StrictMode.setThreadPolicy(policy);
+        try (InputStream is = getResources().openRawResource(R.raw.app_android_translate_0477bd9fee94)){
+            final GoogleCredentials mycredentials = GoogleCredentials.fromStream(is);
+
+            TranslateOptions translateOptions = TranslateOptions.newBuilder().setCredentials(mycredentials).build();
+            translate = translateOptions.getService();
+
+        }
+        catch (IOException ioe)
+        {
+            ioe.printStackTrace();
+        }
     }
 
     private void translate() {
-//        originalText = editText.getText().toString();
-//        Translation translation = translate.translate(originalText, Translate.TranslateOption.targetLanguage("vn"),Translate.TranslateOption.model("base"));
-//        translatedText = translation.getTranslatedText();
-//
-//        tvN.setText(translatedText);
+        originalText = editText.getText().toString();
+        Translation translation = translate.translate(originalText, Translate.TranslateOption.targetLanguage("vn"),Translate.TranslateOption.model("base"));
+        translatedText = translation.getTranslatedText();
+
+        tvN.setText(translatedText);
     }
 
     private boolean checkInternetConnection() {

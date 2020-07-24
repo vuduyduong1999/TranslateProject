@@ -6,7 +6,9 @@ android {
     buildToolsVersion "29.0.3"
 
     packagingOptions {
-         exclude 'project.properties'
+        exclude 'META-INF/INDEX.LIST'
+        exclude 'project.properties'
+        exclude 'META-INF/DEPENDENCIES'
 
       }
     defaultConfig {
@@ -32,8 +34,8 @@ dependencies {
 
     implementation 'com.google.firebase:firebase-analytics:17.2.2'
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-//    implementation 'com.google.cloud:google-cloud-translate:1.95.0'
-
+    implementation 'com.google.cloud:google-cloud-translate:1.95.0'
+    implementation 'com.google.api.grpc:proto-google-cloud-translate-v3:1.1.0'
     implementation 'com.google.firebase:firebase-ml-vision:24.0.3'
     implementation 'com.squareup.retrofit2:retrofit:2.4.0'
     implementation 'com.squareup.retrofit2:converter-gson:2.4.0'
