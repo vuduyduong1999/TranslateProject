@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".fragment.Dich.LoaiTuFragment">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_margin="10dp">
+        <LinearLayout
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:id="@+id/layout_danhtu"
+            android:orientation="vertical">
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Danh từ"
+                android:textColor="#000000"
+                android:textSize="20dp">
+            </TextView>
+            <TextView
+                android:id="@+id/content_danhtu"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Nội dung"
+                android:textColor="#000000"
+                android:textSize="16dp">
+            </TextView>
+        </LinearLayout>
+        <LinearLayout
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:id="@+id/layout_dongtu"
+            android:orientation="vertical">
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Động từ"
+                android:textColor="#000000"
+                android:textSize="20dp">
+            </TextView>
+            <TextView
+                android:id="@+id/content_dongtu"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Nội dung"
+                android:textColor="#000000"
+                android:textSize="16dp">
+            </TextView>
+        </LinearLayout>
+        <LinearLayout
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:id="@+id/layout_tinhtu"
+            android:orientation="vertical">
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Tính từ"
+                android:textColor="#000000"
+                android:textSize="20dp">
+            </TextView>
+            <TextView
+                android:id="@+id/content_tinhtu"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Nội dung"
+                android:textColor="#000000"
+                android:textSize="16dp">
+            </TextView>
+        </LinearLayout>
+        <LinearLayout
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:id="@+id/layout_trangtu"
+            android:orientation="vertical">
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Trang từ"
+                android:textColor="#000000"
+                android:textSize="20dp">
+            </TextView>
+            <TextView
+                android:id="@+id/content_Trangtu"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Nội dung"
+                android:textColor="#000000"
+                android:textSize="16dp">
+            </TextView>
+        </LinearLayout>
+    </LinearLayout>
+
+</FrameLayout>
