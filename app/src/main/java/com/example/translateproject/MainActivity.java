@@ -1,9 +1,13 @@
 package com.example.translateproject;
 
+import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.webkit.WebView;
+import android.widget.Toast;
 
 import com.example.translateproject.fragment.DichFragment;
 import com.example.translateproject.fragment.LSuFragment;
@@ -135,5 +139,30 @@ public class MainActivity extends AppCompatActivity {
             super.onBackPressed();
         }
     }
+    private void requestRecordAudioPermission() {
 
+        String requiredPermission = Manifest.permission.RECORD_AUDIO;
+
+        // If the user previously denied this permission then show a message explaining why
+        // this permission is needed
+        if (checkCallingOrSelfPermission(requiredPermission) == PackageManager.PERMISSION_GRANTED) {
+
+        } else {
+
+            Toast.makeText(this, "This app needs to record audio through the microphone....", Toast.LENGTH_SHORT).show();
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                requestPermissions(new String[]{requiredPermission}, 101);
+            }
+        }
+
+
+    }
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == 101 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            // This method is called when the  permissions are given
+            requestRecordAudioPermission();
+        }
+    }
 }

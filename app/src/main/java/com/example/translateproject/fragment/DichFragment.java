@@ -12,56 +12,50 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
-
-import android.os.StrictMode;
 import android.provider.MediaStore;
 import android.speech.RecognizerIntent;
 import android.speech.tts.TextToSpeech;
+import android.transition.Visibility;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.translateproject.R;
-//import com.example.translateproject.TranslateText;
+import com.example.translateproject.TranslateFM;
 import com.example.translateproject.fragment.Dich.DongNghiaFragment;
 import com.example.translateproject.fragment.Dich.GoiYFragment;
 import com.example.translateproject.fragment.Dich.LoaiTuFragment;
 import com.example.translateproject.fragment.Dich.TraiNghiaFragment;
+import com.example.translateproject.model.Word;
+import com.example.translateproject.model.WordAntonyms;
+import com.example.translateproject.model.WordExamples;
+import com.example.translateproject.model.WordSynonyms;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
-//import com.google.auth.oauth2.GoogleCredentials;
 import com.google.cloud.translate.Translate;
-//import com.google.cloud.translate.v3.Translation;
-//import com.google.cloud.translate.TranslateOptions;
-//import com.google.cloud.translate.Translation;
 import com.google.firebase.ml.vision.FirebaseVision;
 import com.google.firebase.ml.vision.common.FirebaseVisionImage;
-import com.google.firebase.ml.vision.text.FirebaseVisionCloudTextRecognizerOptions;
 import com.google.firebase.ml.vision.text.FirebaseVisionText;
 import com.google.firebase.ml.vision.text.FirebaseVisionTextRecognizer;
-//import com.google.api.services.translate.Translate;
-import com.google.auth.oauth2.GoogleCredentials;
-import com.google.cloud.translate.Translate;
-import com.google.cloud.translate.TranslateOptions;
-import com.google.cloud.translate.Translation;
+import com.google.gson.Gson;
 
-//import java.io.IOException;
-//import java.io.InputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
-//import java.util.Arrays;
+
 import java.util.List;
 import java.util.Locale;
 
-import javax.xml.transform.Result;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
+
 
 /**
  * A simple {@link Fragment} subclass.
@@ -75,6 +69,7 @@ public class DichFragment extends Fragment {
     private String translatedText;
     private boolean connected;
     final int REQ_CODE = 100;
+    FrameLayout loaiTuF, dongNghiaF, traiNghiaF, goiYF;
     TextToSpeech textToSpeech, sp2;
 
     static final int REQUEST_IMAGE_CAPTURE = 1;
@@ -84,8 +79,6 @@ public class DichFragment extends Fragment {
     public DichFragment() {
         // Required empty public constructor
     }
-
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -95,19 +88,13 @@ public class DichFragment extends Fragment {
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-
-        //
-
-        //
         super.onViewCreated(view, savedInstanceState);
-        Fragment fragment = new LoaiTuFragment();
-        loadFragment(fragment,R.id.fragment_Loaitu);
-        fragment = new DongNghiaFragment();
-        loadFragment(fragment,R.id.fragment_DongNghia);
-        fragment = new TraiNghiaFragment();
-        loadFragment(fragment,R.id.fragment_TraiNghia);
-        fragment = new GoiYFragment();
-        loadFragment(fragment,R.id.fragment_GoiY);
+
+        loaiTuF = getActivity().findViewById(R.id.fragment_Loaitu);
+        dongNghiaF = getActivity().findViewById(R.id.fragment_DongNghia);
+        traiNghiaF = getActivity().findViewById(R.id.fragment_TraiNghia);
+        goiYF = getActivity().findViewById(R.id.fragment_GoiY);
+        defaultState();
         IBinputVoice = getActivity().findViewById(R.id.ib_SpeechToText);
         btnDich = getActivity().findViewById(R.id.btnDich);
         tvN = getActivity().findViewById(R.id.tvDifin);
@@ -143,12 +130,12 @@ public class DichFragment extends Fragment {
         ibSpeakerDifi.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(!editText.getText().toString().equals(""))
+                if(!tvN.getText().toString().equals(""))
                 {
                     textToSpeech = new TextToSpeech(getContext(), new TextToSpeech.OnInitListener() {
                         @Override
                         public void onInit(int status) {
-                            String text = editText.getText().toString();
+                            String text = tvN.getText().toString();
                             if(status == TextToSpeech.SUCCESS)
                                 textToSpeech.setLanguage(Locale.forLanguageTag("vi-VN"));
                             textToSpeech.speak(text,TextToSpeech.QUEUE_FLUSH,null);
@@ -164,13 +151,14 @@ public class DichFragment extends Fragment {
 
             }
         });
-        //
+        // nút dịch nè....
         btnDich.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (checkInternetConnection()) {
-                    getTranslateService();
-                    translate();
+                    TranslateFM t = new TranslateFM(getContext());
+                    tvN.setText(t.translate(editText.getText().toString()));
+                    loadAdvFragment();
                 } else {
 
                     //If not, display "no connection" warning:
@@ -182,6 +170,138 @@ public class DichFragment extends Fragment {
 
     }
 
+    private void defaultState(){
+        loaiTuF.setVisibility(View.INVISIBLE);
+        traiNghiaF.setVisibility(View.INVISIBLE);
+        dongNghiaF.setVisibility(View.INVISIBLE);
+        goiYF.setVisibility(View.INVISIBLE);
+    }
+
+    private WordExamples getExamples(String word)
+    {
+
+        OkHttpClient client = new OkHttpClient();
+
+        Request request = new Request.Builder()
+                .url("https://wordsapiv1.p.rapidapi.com/words/"+word+"/examples")
+                .get()
+                .addHeader("x-rapidapi-host", "wordsapiv1.p.rapidapi.com")
+                .addHeader("x-rapidapi-key", "e04ae66d6emshc4e396f30acf6a3p1c6175jsn5905fe697fe9")
+                .build();
+
+        try {
+            Response response = client.newCall(request).execute();
+            WordExamples rs;
+            Gson gson = new Gson();
+            try {
+                String json = response.body().string();
+                rs = gson.fromJson(json,WordExamples.class);
+                return rs;
+            }
+            catch (Exception ex)
+            {
+                return null;
+            }
+
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+    private WordSynonyms getSynonyms(String word)
+    {
+
+        OkHttpClient client = new OkHttpClient();
+
+        Request request = new Request.Builder()
+                .url("https://wordsapiv1.p.rapidapi.com/words/"+word+"/synonyms")
+                .get()
+                .addHeader("x-rapidapi-host", "wordsapiv1.p.rapidapi.com")
+                .addHeader("x-rapidapi-key", "e04ae66d6emshc4e396f30acf6a3p1c6175jsn5905fe697fe9")
+                .build();
+
+
+
+        try {
+            Response response = client.newCall(request).execute();
+            WordSynonyms rs;
+            Gson gson = new Gson();
+            try {
+                String json = response.body().string();
+                rs = gson.fromJson(json,WordSynonyms.class);
+                return rs;
+            }
+            catch (Exception ex)
+            {
+                return null;
+            }
+
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+    private WordAntonyms getAntonyms(String word)
+    {
+        OkHttpClient client = new OkHttpClient();
+
+        Request request = new Request.Builder()
+                .url("https://wordsapiv1.p.rapidapi.com/words/"+word+"/antonyms")
+                .get()
+                .addHeader("x-rapidapi-host", "wordsapiv1.p.rapidapi.com")
+                .addHeader("x-rapidapi-key", "e04ae66d6emshc4e396f30acf6a3p1c6175jsn5905fe697fe9")
+                .build();
+        try {
+            Response response = client.newCall(request).execute();
+            WordAntonyms rs;
+            Gson gson = new Gson();
+            try {
+                String json = response.body().string();
+                rs = gson.fromJson(json,WordAntonyms.class);
+                return rs;
+            }
+            catch (Exception ex)
+            {
+                return null;
+            }
+
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+    private Word getWord(String word)
+    {
+        OkHttpClient client = new OkHttpClient();
+
+        Request request = new Request.Builder()
+                .url("https://wordsapiv1.p.rapidapi.com/words/"+word)
+                .get()
+                .addHeader("x-rapidapi-host", "wordsapiv1.p.rapidapi.com")
+                .addHeader("x-rapidapi-key", "e04ae66d6emshc4e396f30acf6a3p1c6175jsn5905fe697fe9")
+                .build();
+
+        try {
+            Response response = client.newCall(request).execute();
+            Word rs;
+            Gson gson = new Gson();
+            try {
+                rs = gson.fromJson(response.body().string(),Word.class);
+                return rs;
+            }catch (Exception ex)
+            {
+                return null;
+            }
+
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
     private void detectText() {
         FirebaseVisionImage firebaseVisionImage = FirebaseVisionImage.fromBitmap(imageBitmap);
         FirebaseVisionTextRecognizer detector = FirebaseVision.getInstance().getOnDeviceTextRecognizer();
@@ -227,6 +347,7 @@ public class DichFragment extends Fragment {
             startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
         }
     }
+
     private void getVoice() {
         Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
         intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
@@ -266,30 +387,6 @@ public class DichFragment extends Fragment {
         }
     }
 
-    private void getTranslateService() {
-        StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
-        StrictMode.setThreadPolicy(policy);
-        try (InputStream is = getResources().openRawResource(R.raw.app_android_translate_0477bd9fee94)){
-            final GoogleCredentials mycredentials = GoogleCredentials.fromStream(is);
-
-            TranslateOptions translateOptions = TranslateOptions.newBuilder().setCredentials(mycredentials).build();
-            translate = translateOptions.getService();
-
-        }
-        catch (IOException ioe)
-        {
-            ioe.printStackTrace();
-        }
-    }
-
-    private void translate() {
-        originalText = editText.getText().toString();
-        Translation translation = translate.translate(originalText, Translate.TranslateOption.targetLanguage("vn"),Translate.TranslateOption.model("base"));
-        translatedText = translation.getTranslatedText();
-
-        tvN.setText(translatedText);
-    }
-
     private boolean checkInternetConnection() {
         ConnectivityManager connectivityManager = (ConnectivityManager)getContext().getSystemService(Context.CONNECTIVITY_SERVICE);
 
@@ -300,6 +397,48 @@ public class DichFragment extends Fragment {
         return connected;
     }
 
+    private void loadAdvFragment()
+    {
+        String text = editText.getText().toString();
+        Bundle bundle = new Bundle();
+        WordSynonyms synonyms = new WordSynonyms();
+        synonyms = getSynonyms(text);
+        if(synonyms != null)
+        {
+
+            bundle.putStringArray("synonyms",synonyms.getSynonyms());
+            DongNghiaFragment dnf = new DongNghiaFragment();
+            dnf.setArguments(bundle);
+            FragmentTransaction fragmentTransaction = getParentFragmentManager().beginTransaction();
+            fragmentTransaction.replace(R.id.fragment_DongNghia,dnf);
+            fragmentTransaction.commit();
+            dongNghiaF.setVisibility(View.VISIBLE);
+        }
+        WordAntonyms antonyms = new WordAntonyms();
+        antonyms = getAntonyms(text);
+        if(antonyms != null)
+        {
+            bundle.putStringArray("antonyms",antonyms.getAntonyms());
+            TraiNghiaFragment dnf = new TraiNghiaFragment();
+            dnf.setArguments(bundle);
+            FragmentTransaction fragmentTransaction = getParentFragmentManager().beginTransaction();
+            fragmentTransaction.replace(R.id.fragment_TraiNghia,dnf);
+            fragmentTransaction.commit();
+            traiNghiaF.setVisibility(View.VISIBLE);
+        }
+        WordExamples wordExamples = new WordExamples();
+        wordExamples = getExamples(text);
+        if(wordExamples != null)
+        {
+            bundle.putStringArray("examples",wordExamples.getExamples());
+            GoiYFragment dnf = new GoiYFragment();
+            dnf.setArguments(bundle);
+            FragmentTransaction fragmentTransaction = getParentFragmentManager().beginTransaction();
+            fragmentTransaction.replace(R.id.fragment_GoiY,dnf);
+            fragmentTransaction.commit();
+            goiYF.setVisibility(View.VISIBLE);
+        }
+    }
     private void loadFragment(Fragment fragment, int fragment_dongNghia) {
         FragmentTransaction fragmentTransaction = getParentFragmentManager().beginTransaction();
         fragmentTransaction.replace(fragment_dongNghia,fragment);
