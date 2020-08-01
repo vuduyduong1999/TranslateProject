@@ -14,22 +14,24 @@
         app:layout_constraintTop_toTopOf="parent"
         android:padding="10dp">
         <TextView
-            android:id="@+id/tvWordH"
+            android:id="@+id/tvpartofspeechLT"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="TextView"/>
+
+        <TextView
+            android:id="@+id/tvdefiLT"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="TextView"
             android:textSize="17dp"
             android:textStyle="bold"/>
         <TextView
-            android:id="@+id/tvContentH"
+            android:id="@+id/tvdichLT"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:textSize="11dp"
             android:text="TextView"/>
-        <TextView
-            android:id="@+id/tvtimeH"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textSize="9dp"
-            android:text="TextView"/>
+
     </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>
